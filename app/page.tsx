@@ -11,9 +11,9 @@ export default async function Home() {
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Riverline AI</h1>
+        <h1 className="text-4xl font-bold mb-2">Riverline AI X Cred</h1>
         <p className="text-muted-foreground">
-          Manage and track user payment information
+          Voice agents to assist in collecting credit card payments.
         </p>
       </div>
       <UsersTable users={users} />

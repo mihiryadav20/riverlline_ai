@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 interface User {
   id: string;
@@ -28,31 +31,78 @@ interface UsersTableProps {
   users: User[];
 }
 
-export function UsersTable({ users }: UsersTableProps) {
+type SortField = "amountDue" | "overduePeriodInDays" | null;
+type SortOrder = "asc" | "desc";
+
+export function UsersTable({ users: initialUsers }: UsersTableProps) {
+  const [sortField, setSortField] = useState<SortField>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedUsers = [...initialUsers].sort((a, b) => {
+    if (!sortField) return 0;
+
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+
+    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const SortButton = ({ field, label }: { field: SortField; label: string }) => (
+    <button
+      onClick={() => handleSort(field)}
+      className="flex items-center gap-2 hover:text-foreground transition-colors"
+    >
+      {label}
+      <ArrowUpDown
+        size={16}
+        className={`${
+          sortField === field
+            ? "text-blue-600"
+            : "text-muted-foreground"
+        }`}
+      />
+    </button>
+  );
+
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
+        <TableHeader className="font-bold">
           <TableRow>
             <TableHead>Username</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Bank</TableHead>
-            <TableHead>Amount Due</TableHead>
+            <TableHead>
+              <SortButton field="amountDue" label="Amount Due" />
+            </TableHead>
             <TableHead>Due Month</TableHead>
-            <TableHead>Overdue Days</TableHead>
+            <TableHead>
+              <SortButton field="overduePeriodInDays" label="Overdue Days" />
+            </TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Last Call</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.length === 0 ? (
+          {sortedUsers.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} className="text-center text-muted-foreground">
                 No users found
               </TableCell>
             </TableRow>
           ) : (
-            users.map((user) => (
+            sortedUsers.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.username}</TableCell>
                 <TableCell>{user.phone}</TableCell>
@@ -74,9 +124,9 @@ export function UsersTable({ users }: UsersTableProps) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  {user.lastCallAt
-                    ? new Date(user.lastCallAt).toLocaleString()
-                    : "Never"}
+                  <Button variant="outline" size="sm">
+                    Agent Call
+                  </Button>
                 </TableCell>
               </TableRow>
             ))
