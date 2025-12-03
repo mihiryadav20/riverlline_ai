@@ -9,8 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Phone } from "lucide-react";
 
 interface User {
   id: string;
@@ -37,6 +45,13 @@ type SortOrder = "asc" | "desc";
 export function UsersTable({ users: initialUsers }: UsersTableProps) {
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleAgentCall = (user: User) => {
+    setSelectedUser(user);
+    setDialogOpen(true);
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -124,7 +139,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleAgentCall(user)}>
                     Agent Call
                   </Button>
                 </TableCell>
@@ -133,6 +148,76 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
           )}
         </TableBody>
       </Table>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Agent Call - {selectedUser?.username}</DialogTitle>
+            <DialogDescription>
+              Review user details before initiating the call
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Username</p>
+                  <p className="font-medium">{selectedUser.username}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-medium">{selectedUser.phone}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Credit Card Number</p>
+                  <p className="font-medium">{selectedUser.creditCardNumber}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Bank</p>
+                  <p className="font-medium">{selectedUser.bank}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Amount Due</p>
+                  <p className="font-medium text-red-600">₹{selectedUser.amountDue.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Due Month</p>
+                  <p className="font-medium">{selectedUser.dueMonth}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Overdue Days</p>
+                  <p className="font-medium">{selectedUser.overduePeriodInDays} days</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                      selectedUser.status === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : selectedUser.status === "calling"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {selectedUser.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button>
+              <Phone size={16} />
+              Start Call
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
