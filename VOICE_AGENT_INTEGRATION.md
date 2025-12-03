@@ -53,6 +53,8 @@ Ensure these variables are set in `.env`:
 LIVEKIT_URL=wss://your-server.livekit.cloud
 LIVEKIT_API_KEY=your-api-key
 LIVEKIT_API_SECRET=your-api-secret
+LIVEKIT_AGENT_ID=CA_gara2oA52ZWe
+LIVEKIT_AGENT_NAME=Blake_17c
 ```
 
 #### Room Naming Convention

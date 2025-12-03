@@ -130,6 +130,36 @@ export function VoiceCall({
       await newRoom.localParticipant.setMicrophoneEnabled(true);
 
       setRoom(newRoom);
+
+      // Dispatch the agent to join the room
+      try {
+        const agentResponse = await fetch("/api/dispatch-agent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            roomName,
+            agentName: "Blake_17c",
+            metadata: {
+              userId,
+              userName,
+              userPhone,
+              ...userMetadata,
+            },
+          }),
+        });
+
+        if (!agentResponse.ok) {
+          console.error("Failed to dispatch agent, but room connection successful");
+        } else {
+          const agentResult = await agentResponse.json();
+          console.log("Agent dispatched successfully:", agentResult);
+        }
+      } catch (agentErr) {
+        console.error("Error dispatching agent:", agentErr);
+        // Don't throw here - room is already connected
+      }
     } catch (err) {
       console.error("Error connecting to room:", err);
       setError(err instanceof Error ? err.message : "Failed to connect");
