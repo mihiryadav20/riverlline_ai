@@ -17,7 +17,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Phone } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { VoiceCall } from "@/components/voice-call";
 
 interface User {

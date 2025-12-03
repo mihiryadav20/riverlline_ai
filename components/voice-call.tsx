@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-// @ts-ignore - livekit-client types issue
+// @ts-expect-error - livekit-client types issue with module resolution
 import { Room, RoomEvent, Track } from "livekit-client";
 import { Button } from "@/components/ui/button";
 import { Phone, PhoneOff, Mic, MicOff } from "lucide-react";
@@ -10,7 +10,7 @@ interface VoiceCallProps {
   userId: string;
   userName: string;
   userPhone: string;
-  userMetadata?: Record<string, any>;
+  userMetadata?: Record<string, string | number>;
   onCallEnd?: () => void;
 }
 
@@ -44,6 +44,19 @@ export function VoiceCall({
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const cleanup = useCallback(() => {
+    if (room) {
+      room.disconnect();
+      setRoom(null);
+    }
+    setIsConnected(false);
+    setIsConnecting(false);
+    setCallDuration(0);
+    if (onCallEnd) {
+      onCallEnd();
+    }
+  }, [room, onCallEnd]);
 
   const connectToRoom = useCallback(async () => {
     try {
@@ -97,7 +110,7 @@ export function VoiceCall({
         cleanup();
       });
 
-      newRoom.on(RoomEvent.TrackSubscribed, (track: any, publication: any, participant: any) => {
+      newRoom.on(RoomEvent.TrackSubscribed, (track: typeof Track.prototype) => {
         console.log("Track subscribed:", track.kind);
         if (track.kind === Track.Kind.Audio) {
           const audioElement = track.attach();
@@ -105,9 +118,9 @@ export function VoiceCall({
         }
       });
 
-      newRoom.on(RoomEvent.TrackUnsubscribed, (track: any) => {
+      newRoom.on(RoomEvent.TrackUnsubscribed, (track: typeof Track.prototype) => {
         console.log("Track unsubscribed:", track.kind);
-        track.detach().forEach((element: any) => element.remove());
+        track.detach().forEach((element: HTMLMediaElement) => element.remove());
       });
 
       // Connect to the room
@@ -122,20 +135,7 @@ export function VoiceCall({
       setError(err instanceof Error ? err.message : "Failed to connect");
       setIsConnecting(false);
     }
-  }, [userId, userName, userPhone, userMetadata]);
-
-  const cleanup = useCallback(() => {
-    if (room) {
-      room.disconnect();
-      setRoom(null);
-    }
-    setIsConnected(false);
-    setIsConnecting(false);
-    setCallDuration(0);
-    if (onCallEnd) {
-      onCallEnd();
-    }
-  }, [room, onCallEnd]);
+  }, [userId, userName, userPhone, userMetadata, cleanup]);
 
   const toggleMute = useCallback(async () => {
     if (!room) return;
