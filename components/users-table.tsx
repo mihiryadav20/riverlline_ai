@@ -15,10 +15,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Phone } from "lucide-react";
+import { VoiceCall } from "@/components/voice-call";
 
 interface User {
   id: string;
@@ -207,15 +207,21 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
             </div>
           )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button>
-              <Phone size={16} />
-              Start Call
-            </Button>
-          </DialogFooter>
+          {selectedUser && (
+            <VoiceCall
+              userId={selectedUser.id}
+              userName={selectedUser.username}
+              userPhone={selectedUser.phone}
+              userMetadata={{
+                creditCardNumber: selectedUser.creditCardNumber,
+                bank: selectedUser.bank,
+                amountDue: selectedUser.amountDue,
+                dueMonth: selectedUser.dueMonth,
+                overduePeriodInDays: selectedUser.overduePeriodInDays,
+              }}
+              onCallEnd={() => setDialogOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
